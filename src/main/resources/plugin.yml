@@ -1,7 +1,7 @@
 author: CombatTag
 description: LobbySwitch plugin
 main: com.lobbyswitch.LobbySwitch
-name: LobbySwitch
+name: LobbySwitch-Redis
 version: 0.3.8
 commands:
   lobbyswitch:

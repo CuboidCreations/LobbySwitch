@@ -67,7 +67,7 @@ public class CypherPlayerListener implements Listener, PluginMessageListener {
 
     @Override
     public void onPluginMessageReceived(String channel, Player player, byte[] message) {
-        if (!channel.equals("BungeeCord")) {
+        if (!channel.equals("RedisBungee")) {
             return;
         }
 

@@ -29,8 +29,8 @@ public class LobbySwitch extends JavaPlugin {
         loadConfig();
         configManager = new ConfigManager(config);
         registerListener(Bukkit.getPluginManager());
-        Bukkit.getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
-        Bukkit.getMessenger().registerIncomingPluginChannel(this, "BungeeCord", new CypherPlayerListener());
+        Bukkit.getMessenger().registerOutgoingPluginChannel(this, "RedisBungee");
+        Bukkit.getMessenger().registerIncomingPluginChannel(this, "RedisBungee", new CypherPlayerListener());
         CommandManager.registerCommands();
     }
 
