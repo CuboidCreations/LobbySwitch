@@ -6,7 +6,7 @@
 
     <groupId>com.cypher</groupId>
     <artifactId>LobbySwitch</artifactId>
-    <version>0.4.9-SNAPSHOT</version>
+    <version>0.5-SNAPSHOT</version>
 
     <build>
         <plugins>
@@ -45,8 +45,8 @@
 
     <repositories>
         <repository>
-            <id>uncnqrd</id>
-            <url>http://uncnqrd.com:8081/artifactory/ext-snapshot-local</url>
+            <id>spigotmc</id>
+            <url>https://hub.spigotmc.org/nexus/content/groups/public</url>
         </repository>
     </repositories>
 
@@ -54,7 +54,7 @@
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>1.8-R0.1-SNAPSHOT</version>
+            <version>1.8.7-R0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
