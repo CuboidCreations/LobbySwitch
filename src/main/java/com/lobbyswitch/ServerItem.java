@@ -1,5 +1,6 @@
 package com.lobbyswitch;
 
+import com.lobbyswitch.util.ItemUtil;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -15,22 +16,32 @@ public class ServerItem {
 
     private Material material;
     private byte metaData;
-    private int amount;
+    private String amount;
     private String displayName;
     private String targetServer;
     private List<String> lore;
+    private boolean enchanted;
 
-    public ServerItem(Material material, byte metaData, int amount, String displayName, String targetServer, List<String> lore) {
+    public ServerItem(Material material, byte metaData, String amount, String displayName, String targetServer, List<String> lore, boolean enchanted) {
         this.material = material;
         this.metaData = metaData;
         this.amount = amount;
         this.displayName = displayName;
         this.targetServer = targetServer;
         this.lore = lore;
+        this.enchanted = enchanted;
     }
 
     public ItemStack getItemStack() {
-        ItemStack itemStack = new ItemStack(material, amount, metaData);
+        int intAmount;
+
+        try {
+            intAmount = Integer.valueOf(amount);
+        } catch(NumberFormatException e) {
+            intAmount = LobbySwitch.p.getServers().get(targetServer).getPlayerCount();
+        }
+
+        ItemStack itemStack = new ItemStack(material, intAmount, metaData);
         ItemMeta itemMeta = itemStack.getItemMeta();
 
         itemMeta.setDisplayName(displayName.replace("&", "\247"));
@@ -40,6 +51,10 @@ public class ServerItem {
         }
         itemMeta.setLore(loreFormatted);
         itemStack.setItemMeta(itemMeta);
+
+        if (enchanted) {
+            itemStack = ItemUtil.addGlow(itemStack);
+        }
 
         return itemStack;
     }
@@ -60,11 +75,11 @@ public class ServerItem {
         this.metaData = metaData;
     }
 
-    public int getAmount() {
+    public String getAmount() {
         return amount;
     }
 
-    public void setAmount(int amount) {
+    public void setAmount(String amount) {
         this.amount = amount;
     }
 
@@ -90,5 +105,13 @@ public class ServerItem {
 
     public void setLore(List<String> lore) {
         this.lore = lore;
+    }
+
+    public boolean isEnchanted() {
+        return enchanted;
+    }
+
+    public void setEnchanted(boolean enchanted) {
+        this.enchanted = enchanted;
     }
 }

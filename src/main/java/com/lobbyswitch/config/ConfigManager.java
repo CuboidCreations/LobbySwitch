@@ -3,6 +3,8 @@ package com.lobbyswitch.config;
 import com.lobbyswitch.LobbySwitch;
 import com.lobbyswitch.ServerData;
 import com.lobbyswitch.ServerItem;
+import com.lobbyswitch.util.ChatUtils;
+import com.lobbyswitch.util.ItemUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -25,7 +27,10 @@ public class ConfigManager {
 
     public ConfigManager(FileConfiguration fileConfiguration) {
         this.fileConfiguration = fileConfiguration;
+    }
 
+    public FileConfiguration getFileConfiguration() {
+        return fileConfiguration;
     }
 
     public ItemStack getSelector() {
@@ -33,6 +38,9 @@ public class ConfigManager {
         ItemMeta itemMeta = itemStack.getItemMeta();
         itemMeta.setDisplayName(fileConfiguration.getString(ConfigPaths.SELECTOR_DISPLAY_NAME).replace("&", "\247"));
         itemStack.setItemMeta(itemMeta);
+        if (fileConfiguration.getBoolean(ConfigPaths.SELECTOR_ENCHANTED)) {
+            itemStack = ItemUtil.addGlow(itemStack);
+        }
         return itemStack;
     }
 
@@ -47,11 +55,19 @@ public class ConfigManager {
                     ServerData serverData = LobbySwitch.p.getServers().get(serverItem.getTargetServer());
                     if (serverItemStack.getItemMeta() != null) {
                         ItemMeta itemMeta = serverItemStack.getItemMeta();
+
+                        String displayName = itemMeta.getDisplayName();
+
+                        displayName = ChatUtils.replaceLowerCasePlaceholder(displayName, "%PLAYER_COUNT%", serverData.getPlayerCount());
+                        displayName = ChatUtils.replaceLowerCasePlaceholder(displayName, "%TARGET_MOTD%", serverData.getMOTD());
+
+                        itemMeta.setDisplayName(displayName);
+
                         List<String> loreLines = new ArrayList<>();
                         if (itemMeta.getLore() != null) {
                             for (String loreLine : itemMeta.getLore()) {
-                                loreLine = loreLine.replace("%PLAYER_COUNT%", String.valueOf(serverData.getPlayerCount()));
-                                loreLine = loreLine.replace("%TARGET_MOTD%", serverData.getMOTD());
+                                loreLine = ChatUtils.replaceLowerCasePlaceholder(loreLine, "%PLAYER_COUNT%", serverData.getPlayerCount());
+                                loreLine = ChatUtils.replaceLowerCasePlaceholder(loreLine, "%TARGET_MOTD%", serverData.getMOTD());
                                 if (loreLine.contains("\n")) {
                                     loreLines.addAll(Arrays.asList(loreLine.split("\n")));
                                 } else {
@@ -77,12 +93,13 @@ public class ConfigManager {
     public ServerItem getServerItem(int slot) {
         Material material;
         byte metaData;
-        int amount;
+        String amount;
         String displayName;
         String targetServer;
         List<String> lore;
+        boolean enchanted;
         if (getSlots().contains(String.valueOf(slot))) {
-            amount = fileConfiguration.getInt(ConfigPaths.getSlotPath(ConfigPaths.SERVER_SLOT_AMOUNT, slot));
+            amount = fileConfiguration.getString(ConfigPaths.getSlotPath(ConfigPaths.SERVER_SLOT_AMOUNT, slot));
             displayName = fileConfiguration.getString(ConfigPaths.getSlotPath(ConfigPaths.SERVER_SLOT_DISPLAY_NAME, slot));
             material = Material.valueOf(fileConfiguration.getString(ConfigPaths.getSlotPath(ConfigPaths.SERVER_SLOT_MATERIAL, slot)));
             if (fileConfiguration.contains(ConfigPaths.getSlotPath(ConfigPaths.SERVER_SLOT_METADATA, slot))) {
@@ -92,10 +109,11 @@ public class ConfigManager {
             }
             targetServer = fileConfiguration.getString(ConfigPaths.getSlotPath(ConfigPaths.SERVER_SLOT_TARGET_SERVER, slot));
             lore = fileConfiguration.getStringList(ConfigPaths.getSlotPath(ConfigPaths.SERVER_SLOT_LORE, slot));
+            enchanted = fileConfiguration.getBoolean(ConfigPaths.getSlotPath(ConfigPaths.SERVER_ENCHANTED, slot));
         } else {
             return null;
         }
-        return new ServerItem(material, metaData, amount, displayName, targetServer, lore);
+        return new ServerItem(material, metaData, amount, displayName, targetServer, lore, enchanted);
     }
 
     public void saveServerItem(ServerItem serverItem, int slot) {
@@ -105,6 +123,7 @@ public class ConfigManager {
         fileConfiguration.set(ConfigPaths.getSlotPath(ConfigPaths.SERVER_SLOT_METADATA, slot), String.valueOf(serverItem.getMetaData()));
         fileConfiguration.set(ConfigPaths.getSlotPath(ConfigPaths.SERVER_SLOT_TARGET_SERVER, slot), serverItem.getTargetServer());
         fileConfiguration.set(ConfigPaths.getSlotPath(ConfigPaths.SERVER_SLOT_LORE, slot), serverItem.getLore());
+        fileConfiguration.set(ConfigPaths.getSlotPath(ConfigPaths.SERVER_ENCHANTED, slot), serverItem.isEnchanted());
         LobbySwitch.p.saveConfig();
     }
 

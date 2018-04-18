@@ -8,7 +8,9 @@ import com.lobbyswitch.config.ConfigPaths;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -19,8 +21,8 @@ public class CypherInventoryListener implements Listener {
 
     @EventHandler
     public void onInventoryClickEvent(InventoryClickEvent event) {
-        if (event.getClickedInventory() == event.getWhoClicked().getOpenInventory().getTopInventory()) {
-            if (event.getClickedInventory().getName().equals(LobbySwitch.p.getConfig().getString(ConfigPaths.INVENTORY_NAME))) {
+        if (event.getInventory() == event.getWhoClicked().getOpenInventory().getTopInventory()) {
+            if (event.getInventory().getName().replace("\247", "&").equals(LobbySwitch.p.getConfig().getString(ConfigPaths.INVENTORY_NAME))) {
                 if (event.getInventory().getSize() >= event.getSlot() && event.getSlot() >= 0) {
                     ItemStack itemStack = event.getInventory().getItem(event.getSlot());
                     if (itemStack != null) {
@@ -39,6 +41,28 @@ public class CypherInventoryListener implements Listener {
                                 }
                             }
                         }
+                    }
+                }
+            }
+        }
+
+        if (LobbySwitch.p.getConfigManager().getFileConfiguration().getBoolean(ConfigPaths.SELECTOR_SLOT_FORCED)) {
+            InventoryView inventoryView = event.getView();
+            ItemStack selector = LobbySwitch.p.getConfigManager().getSelector();
+            ItemStack affectedStack = inventoryView.getItem(event.getRawSlot());
+
+            if (affectedStack != null && affectedStack.equals(selector)) {
+                event.setCancelled(true);
+            } else if (event.getAction() == InventoryAction.HOTBAR_SWAP || event.getAction() == InventoryAction.HOTBAR_MOVE_AND_READD) {
+                affectedStack = inventoryView.getItem(event.getHotbarButton());
+
+                if (affectedStack != null && affectedStack.equals(selector)) {
+                    event.setCancelled(true);
+                } else {
+                    affectedStack = inventoryView.getBottomInventory().getItem(event.getHotbarButton());
+
+                    if (affectedStack != null && affectedStack.equals(selector)) {
+                        event.setCancelled(true);
                     }
                 }
             }
